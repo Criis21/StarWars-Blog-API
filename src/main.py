@@ -8,11 +8,9 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, Personajes, Planetas, Favoritos
+import datetime
 #from models import Person
-
-#import JWT for tokenization
-from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -22,10 +20,6 @@ MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
 setup_admin(app)
-
-# config for jwt
-app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY")
-jwt = JWTManager(app)
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
@@ -40,119 +34,133 @@ def sitemap():
 @app.route('/user', methods=['GET'])
 def handle_hello():
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+    query = User.query.all()
+    results = list(map(lambda x: x.serialize(), query))
 
-    return jsonify(response_body), 200
+    return jsonify(results), 200
 
-@app.route('/register', methods=['POST'])
-def register_user():
-    email = request.json.get("email", None)
-    password = request.json.get("password", None)
+@app.route('/user/<int:id>', methods=['GET'])
+def macheo_informacion_user(id):
 
-    # valida si estan vacios los ingresos
-    if email is None:
-        return jsonify({"msg": "No email was provided"}), 400
-    if password is None:
-        return jsonify({"msg": "No password was provided"}), 400
+    usuario = User.query.get(id)
+    if usuario is None:
+        raise APIException('Usuario not found', status_code=404)
+    results = usuario.serialize()
     
-    # busca usuario en BBDD
-    user = User.query.filter_by(email=email).first()
-    if user:
-        # the user was not found on the database
-        return jsonify({"msg": "User already exists"}), 401
-    else:
-        # crea usuario nuevo
-        # crea registro nuevo en BBDD de 
-        return jsonify({"msg": "User created successfully"}), 200
 
-@app.route('/login', methods=['POST']) 
-def login():
-    user = request.json.get("email", None)
-    password = request.json.get("password", None)
+    return jsonify(results), 200
 
-    # valida si estan vacios los ingresos
-    if user is None:
-        return jsonify({"msg": "No email was provided"}), 400
-    if password is None:
-        return jsonify({"msg": "No password was provided"}), 400
+@app.route('/personajes', methods=['GET'])
+def personajes_todos():
 
-    # para proteger contraseñas usen hashed_password
-    # busca usuario en BBDD
-    user = User.query.filter_by(user=user, password=password).first()
-    if user is None:
-        return jsonify({"msg": "Invalid username or password"}), 401
-    else:
-        # crear token
-        my_token = create_access_token(identity=user.id)
-        return jsonify({"token": my_token})
+    query = Personajes.query.all()
+    results = list(map(lambda x: x.serialize2(), query))
 
-@app.route('/personajes', methods=['GET']) 
-def personajes():
-    name = request.json.get("name", None)
-    gender = request.json.get("gender", None)
-    hair_color = request.json.get("hair_color", None)
-    eye_color = request.json.get("eye_color", None)
+    return jsonify(results), 200
 
-    if name is None:
-        return jsonify({"msg": "No Name was provided"}), 400
-    if gender is None:
-        return jsonify({"msg": "No gender was provided"}), 400
-    if hair_color is None:
-        return jsonify({"msg": "No hair_color was provided"}), 400
-    if eye_color is None:
-        return jsonify({"msg": "No eye_color was provided"}), 400
+@app.route('/personajes/<int:id>', methods=['GET'])
+def personaje_unico(id):
 
-    personajes = Personajes.query.filter_by(name=name, gender=gender,hair_color=hair_color,eye_color=eye_color).first()
+    personaje = Personajes.query.get(id)
+    if personaje is None:
+        raise APIException('Personaje not found', status_code=404)
+    results = personaje.serialize2()
 
-    if personajes:
-        # the user was not found on the database
-        return jsonify({"msg": "personajes already exists"}), 401
-    else:
-        # crea usuario nuevo
-        # crea registro nuevo en BBDD de
-        personajes = Personajes(name=name, gender=gender, hair_color=hair_color,eye_color=eye_color)
-        db.session.add(personajes)
-        db.session.commit()
-        return jsonify({"msg": "personajes created successfully"}), 200
+    return jsonify(results), 200
 
-@app.route('/planetas', methods=['GET']) 
-def planetas():
-    name = request.json.get("name", None)
-    diameter = request.json.get("diameter", None)
-    population = request.json.get("population", None)
-    terrain = request.json.get("terrain", None)
+@app.route('/personajes', methods=['POST'])
+def add_personaje():
 
-    if name is None:
-        return jsonify({"msg": "No Name was provided"}), 400
-    if diameter is None:
-        return jsonify({"msg": "No diameter was provided"}), 400
-    if population is None:
-        return jsonify({"msg": "No population was provided"}), 400
-    if terrain is None:
-        return jsonify({"msg": "No terrain was provided"}), 400
+    # recibir info del request
+    request_body = request.get_json()
+    print(request_body)
 
-    planetas = Planetas.query.filter_by(name=name, diameter=diameter,population=population,terrain=terrain).first()
+    per = Personajes(name=request_body["name"], heigth=request_body["heigth"], mass=request_body["mass"], hair_color=request_body["hair_color"], skin_color=request_body["skin_color"], eye_color=request_body["eye_color"], birth_year=request_body["birth_year"],  gender=request_body["gender"], homeworld=request_body["homeworld"], films=request_body["films"])
+    db.session.add(per)
+    db.session.commit()
+
+    return jsonify("Un exito, se ha agregado el personaje"), 200
+
+
+@app.route('/planetas', methods=['GET'])
+def planetas_todos():
+
+    query = Planetas.query.all()
+    results = list(map(lambda x: x.serialize2(), query))
+
+    return jsonify(results), 200
+
+@app.route('/planetas/<int:id>', methods=['GET'])
+def planeta_unico(id):
+
+    planeta = Planetas.query.get(id)
+    if planeta is None:
+        raise APIException('Planeta not found', status_code=404)
+    results = planeta.serialize2()
+
+    return jsonify(results), 200
+
+@app.route('/planetas', methods=['POST'])
+def add_fav_planeta():
+
+    # recibir info del request
+    request_body = request.get_json()
+    print(request_body)
+
+    per = Planetas(name=request_body["name"], climate=request_body["climate"], orbital_period=request_body["orbital_period"], rotation=request_body["rotation"], terrain=request_body["terrain"])
+    db.session.add(per)
+    db.session.commit()
+
+    return jsonify("Un exito, se ha agregado el planeta"), 200
+
+
+@app.route('/favoritos', methods=['GET'])
+def favoritos_todos():
+
+    query = Favoritos.query.all()
+    results = list(map(lambda x: x.serialize2(), query))
+
+    return jsonify(results), 200
+
+@app.route('/favoritos/<int:id>', methods=['GET'])
+def favoritos_unico(id):
+
+    favoritos = Favoritos.query.get(id)
+    if favoritos is None:
+        raise APIException('Favorito not found', status_code=404)
+    results = favoritos.serialize2()
+
+    return jsonify(results), 200
+
+@app.route('/favoritos', methods=['POST'])
+def add_fav_favoritos():
+
+    # recibir info del request
+    request_body = request.get_json()
+    print(request_body)
+
+    pera = Favoritos(usuario_id=request_body["usuario_id"], planeta_id=request_body["planeta_id"], personaje_id=request_body["personaje_id"])
+    db.session.add(pera)
+    db.session.commit()
+
+    return jsonify("Un exito, se ha agregado el favorito"), 200
+
+
+@app.route('/del_favoritos/<int:id>', methods=['DELETE'])
+def del_fav(id):
+
+    # recibir info del request
     
-    if planetas:
-        # the user was not found on the database
-        return jsonify({"msg": "planetas already exists"}), 401
-    else:
-        # crea usuario nuevo
-        # crea registro nuevo en BBDD de
-        planetas = Planetas(name=name, diameter=diameter, population=population,terrain=terrain)
-        db.session.add(planetas)
-        db.session.commit()
-        return jsonify({"msg": "planetas created successfully"}), 200
+    fav = Favoritos.query.get(id)
+    if fav is None:
+        raise APIException('Favorite not found', status_code=404)
 
-@app.route('/favoritos', methods=['GET']) 
-def favoritos():
-    User_id = request.json.get("User_id", None)
-    tipoFavorito = request.json.get("tipoFavorito", None)
-    favoritoId = request.json.get("favoritoId", None)
+    db.session.delete(fav)
 
-    favoritos = Favoritos.query.filter_by(User_id=User_id, tipoFavorito=tipoFavorito,favoritoId=favoritoId).first()
+    db.session.commit()
+
+    return jsonify("Borraste bien la informacion"), 200
+
 
 
 # this only runs if `$ python src/main.py` is executed
