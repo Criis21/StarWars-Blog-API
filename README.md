@@ -1,74 +1,53 @@
-# Flask Boilerplate for Profesional Development
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/from-referrer/)
 <p align="center">
-    <a href="https://youtu.be/ORxQ-K3BzQA"><img height="200px" src="https://github.com/4GeeksAcademy/flask-rest-hello/blob/main/docs/assets/how-to.png?raw=true?raw=true" /></a>
+	<img
+		width="300"
+		alt="4Geeks Academy"
+		src="https://github.com/4GeeksAcademy/About-4Geeks-Academy/blob/master/site/static/background_art.jpg?raw=true">
 </p>
 
-## Features
 
-- Extensive documentation [here](https://github.com/4GeeksAcademy/flask-rest-hello/tree/master/docs).
-- Integrated with Pipenv for package managing.
-- Fast deloyment to heroku with `$ pipenv run deploy`.
-- Use of `.env` file.
-- SQLAlchemy integration for database abstraction.
-
-## Installation (automatic if you are using gitpod)
-
-> Important: The boiplerplate is made for python 3.7 but you can easily change the `python_version` on the Pipfile.
-
-The following steps are automatically runned withing gitpod, if you are doing a local installation you have to do them manually:
-
-```sh
-pipenv install;
-mysql -u root -e "CREATE DATABASE example";
-pipenv run init;
-pipenv run migrate;
-pipenv run upgrade;
-```
-
-## How to Start coding?
-
-There is an example API working with an example database. All your application code should be written inside the `./src/` folder.
-
-- src/main.py (it's where your endpoints should be coded)
-- src/models.py (your database tables and serialization logic)
-- src/utils.py (some reusable classes and functions)
-- src/admin.py (add your models to the admin and manage your data easily)
-
-For a more detailed explanation, look for the tutorial inside the `docs` folder.
-
-## Remember to migrate every time you change your models
-
-You have to migrate and upgrade the migrations for every update you make to your models:
-```
-$ pipenv run migrate (to make the migrations)
-$ pipenv run upgrade  (to update your databse with the migrations)
-```
+<h1 align="center">Welcome to 4Geeks Academy</h1>
 
 
-# Manual Installation for Ubuntu & Mac
+<h3 align="center">&lt;StarWars Blog API&gt;</h3>
 
-⚠️ Make sure you have `python 3.6+` and `MySQL` installed on your computer and MySQL is running, then run the following commands:
-```sh
-$ pipenv install (to install pip packages)
-$ pipenv run migrate (to create the database)
-$ pipenv run start (to start the flask webserver)
-```
+## Content
+
+1. Language
+2. Project instructions
+3. Extra
 
 
-## Deploy to Heroku
+## 👩‍💻Language
 
-This template is 100% compatible with Heroku[https://www.heroku.com/], just make sure to understand and execute the following steps:
+<p>This project contains:</p>
 
-```sh
-// Install heroku
-$ npm i heroku -g
-// Login to heroku on the command line
-$ heroku login -i
-// Create an application (if you don't have it already)
-$ heroku create <your_application_name>
-// Commit and push to heroku (commited your changes)
-$ git push heroku main
-```
-:warning: For a more detailed explanation on working with .env variables or the MySQL database [read the full guide](https://github.com/4GeeksAcademy/flask-rest-hello/blob/master/docs/DEPLOY_YOUR_APP.md).
+<ol>
+    <li>Rest</li>
+    <li>Flask</li>
+</ol>
+
+## 📝Proyect instructions
+
+Create an API that connects to a database and implements the following Endpoints (very similar to SWAPI.dev or SWAPI.tech):
+
+[GET] /people Get a list of all the people in the database
+[GET] /people/<int:people_id> Get a one single people information
+[GET] /planets Get a list of all the planets in the database
+[GET] /planets/<int:planet_id> Get one single planet information
+Aditionally create the following endpoints to allow your StartWars blog to have users and favories:
+
+[GET] /users Get a list of all the blog post users
+[GET] /users/favorites Get all the favorites that belong to the current user.
+[POST] /favorite/planet/<int:planet_id> Add a new favorite planet to the current user with the planet id = planet_id.
+[POST] /favorite/people/<int:planet_id> Add a new favorite people to the current user with the people id = people_id.
+[DELETE] /favorite/planet/<int:planet_id> Delete favorite planet with the id = planet_id.
+[DELETE] /favorite/people/<int:people_id> Delete favorite people with the id = people_id.
+Your current API does not have an authentication system (yet), that is why the only way to create users is directly on the database using the flask admin.
+
+## 😎 Extra
+
+Feeling confident?
+The following requirements are not necesary to successfully complete this project, but you want try coding them if you feel like challenging yourself ☺️
+
++1 Create also an enpoint to add (POST), update (PUT), and delete (DELETE) planets and people, that way all the database information can be manage using the API instead of having to rely on the flask admin to create the plantes and people.
